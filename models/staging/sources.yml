@@ -1,0 +1,19 @@
+sources:
+  - name: tpch_now
+    schema: raw
+
+    tables:
+
+    - name: lineitem
+
+    - name: orders
+
+  - name: tpch_sf001
+    schema: raw
+
+    tables:
+    - name: partsupp
+
+    - name: part
+
+    - name: supplier
