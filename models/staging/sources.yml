@@ -1,6 +1,7 @@
 sources:
   - name: tpch_now
-    schema: raw
+    database: raw
+    schema: tpch_now
 
     config:
       freshness:
@@ -15,7 +16,8 @@ sources:
     - name: orders
 
   - name: tpch_sf001
-    schema: raw
+    database: raw
+    schema: tpch_sf001
 
     config:
       freshness:
