@@ -2,7 +2,10 @@ sources:
   - name: tpch_now
     database: raw
     schema: tpch_now
-
+    description: >
+      Raw TPCH (Transaction Processing Performance Council) benchmark dataset
+      loaded into Snowflake. Simulates an order management system for a parts
+      supplier business with orders, line items.
     config:
       freshness:
         warn_after: {count: 24, period: hour}
@@ -11,13 +14,51 @@ sources:
 
     tables:
 
-    - name: lineitem
+      - name: lineitem
+        description: >
+          Raw line items table. Each row is a single product line within an order.
+          Identified by the composite key of L_ORDERKEY + L_LINENUMBER. Contains
+          pricing, quantity, shipping, and return information per item.
+        columns:
+          - name: l_orderkey
+            description: Foreign key to the parent order in the orders table.
+            tests:
+              - not_null
+          - name: l_linenumber
+            description: Position of the line item within the order. Combined with l_orderkey forms the composite primary key.
+            tests:
+              - not_null
+          - name: l_extendedprice
+            description: Total price for the line (unit price × quantity), not the per-unit price.
+          - name: l_returnflag
+            description: Return status. N = not returned, R = returned, A = accepted return.
 
-    - name: orders
+      - name: orders
+        description: >
+          Raw orders table. Each row is a customer order with status, pricing,
+          and date information. Primary key is O_ORDERKEY. One order can have
+          many line items in the lineitem table.
+        columns:
+          - name: o_orderkey
+            description: Primary key for the order.
+            tests:
+              - not_null
+              - unique
+          - name: o_orderstatus
+            description: Status of the order. F = fulfilled, O = open, P = pending.
+          - name: o_totalprice
+            description: Total price of all line items in the order.
+          - name: o_orderdate
+            description: Date the order was placed.
+
 
   - name: tpch_sf001
     database: raw
     schema: tpch_sf001
+    description: >
+      Raw TPCH (Transaction Processing Performance Council) benchmark dataset
+      loaded into Snowflake. Simulates an order management system for a parts
+      supplier business with parts, suppliers, and customers.
 
     config:
       freshness:
@@ -26,8 +67,35 @@ sources:
       loaded_at_field: _etl_loaded_at
 
     tables:
-    - name: partsupp
+      - name: partsupp
+        description: >
+          Raw part-supplier relationship table. Each row represents a supplier's
+          ability to provide a specific part, including their cost and available stock.
+        columns:
+          - name: ps_partkey
+            description: Foreign key to the part.
+            tests:
+              - not_null
+          - name: ps_suppkey
+            description: Foreign key to the supplier.
+            tests:
+              - not_null
 
-    - name: part
 
-    - name: supplier
+      - name: part
+        description: Raw parts catalogue. Each row is a unique part available for ordering.
+        columns:
+          - name: p_partkey
+            description: Primary key for the part.
+            tests:
+              - not_null
+              - unique
+
+      - name: supplier
+        description: Raw suppliers table. Each row is a supplier that can fulfil parts.
+        columns:
+          - name: s_suppkey
+            description: Primary key for the supplier.
+            tests:
+              - not_null
+              - unique

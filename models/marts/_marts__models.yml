@@ -1,0 +1,72 @@
+version: 2
+
+models:
+  - name: order_items
+    description: >
+      Mart model joining orders and line items. Each row represents a single line
+      item enriched with order-level attributes. This is the primary building block
+      for downstream fact tables. Includes calculated fields for pricing, discounts,
+      tax, and net sales.
+    columns:
+      - name: order_item_key
+        description: Surrogate primary key inherited from stg_tpch_line_items.
+        tests:
+          - not_null
+          - unique
+      - name: order_key
+        description: Foreign key to the parent order.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_tpch_orders')
+              field: order_key
+      - name: customer_key
+        description: Foreign key to the customer who placed the order.
+        tests:
+          - not_null
+      - name: net_item_sales_amount
+        description: "{{ doc('net_item_sales_amount') }}"
+
+  - name: part_suppliers
+    description: >
+      Mart model joining parts, suppliers, and their relationship. Each row represents
+      a unique part-supplier combination enriched with part and supplier attributes.
+    columns:
+      - name: part_supplier_key
+        description: Surrogate primary key for the part-supplier combination.
+        tests:
+          - not_null
+          - unique
+      - name: part_key
+        description: Foreign key to the part.
+        tests:
+          - not_null
+      - name: supplier_key
+        description: Foreign key to the supplier.
+        tests:
+          - not_null
+
+  - name: fct_order_items
+    description: >
+      Core fact table for order item analysis. Joins order_items with part_suppliers
+      to add supplier cost and nation context. Materialized as a table and tagged
+      for finance reporting. Each row is one line item on one order.
+    columns:
+      - name: order_item_key
+        description: Primary key for the fact table row.
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('order_items')
+              field: order_item_key
+      - name: order_key
+        description: Foreign key to the parent order.
+        tests:
+          - not_null
+      - name: customer_key
+        description: Foreign key to the customer.
+        tests:
+          - not_null
+      - name: order_item_count
+        description: Always 1. Used as a convenience field for counting line items in aggregations.
