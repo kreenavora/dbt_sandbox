@@ -10,7 +10,6 @@ line_item as (
 
 )
 select
-
     {{ dbt_utils.generate_surrogate_key(['line_item.order_key', 'line_item.line_number']) }} as order_item_key,
     orders.order_key,
     orders.customer_key,
