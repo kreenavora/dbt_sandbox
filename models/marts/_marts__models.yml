@@ -18,8 +18,9 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('stg_tpch_orders')
-              field: order_key
+              arguments:
+                to: ref('stg_tpch_orders')
+                field: order_key
       - name: customer_key
         description: Foreign key to the customer who placed the order.
         tests:
@@ -58,8 +59,9 @@ models:
           - not_null
           - unique
           - relationships:
-              to: ref('order_items')
-              field: order_item_key
+              arguments:
+                to: ref('order_items')
+                field: order_item_key
       - name: order_key
         description: Foreign key to the parent order.
         tests:

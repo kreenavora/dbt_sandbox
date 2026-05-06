@@ -20,7 +20,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['F', 'O', 'P']
+              arguments:
+                values: ['F', 'O', 'P']
       - name: total_price
         description: Total monetary value of the order.
         tests:
@@ -47,34 +48,39 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('stg_tpch_orders')
-              field: order_key
+              arguments:
+                to: ref('stg_tpch_orders')
+                field: order_key
       - name: part_key
         description: Foreign key to the part being ordered.
         tests:
           - not_null
           - relationships:
-              to: ref('stg_tpch_parts')
-              field: part_key
+              arguments:
+                to: ref('stg_tpch_parts')
+                field: part_key
       - name: supplier_key
         description: Foreign key to the supplier fulfilling the line item.
         tests:
           - not_null
           - relationships:
-              to: ref('stg_tpch_suppliers')
-              field: supplier_key
+              arguments:
+                to: ref('stg_tpch_suppliers')
+                field: supplier_key
       - name: return_flag
         description: "{{ doc('return_flag') }}"
         tests:
           - not_null
           - accepted_values:
-              values: ['N', 'R', 'A']
+              arguments:
+                values: ['N', 'R', 'A']
       - name: status_code
         description: Fulfilment status of the line item. O = open, F = fulfilled.
         tests:
           - not_null
           - accepted_values:
-              values: ['O', 'F']
+              arguments:
+                values: ['O', 'F']
       - name: quantity
         description: Number of units ordered for this line item.
         tests:
@@ -140,15 +146,17 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('stg_tpch_parts')
-              field: part_key
+              arguments:
+                to: ref('stg_tpch_parts')
+                field: part_key
       - name: supplier_key
         description: Foreign key to the supplier.
         tests:
           - not_null
           - relationships:
-              to: ref('stg_tpch_suppliers')
-              field: supplier_key
+              arguments:
+                to: ref('stg_tpch_suppliers')
+                field: supplier_key
       - name: supply_cost
         description: Cost to procure one unit of this part from this supplier.
         tests:
