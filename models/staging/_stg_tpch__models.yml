@@ -1,0 +1,159 @@
+version: 2
+
+models:
+  - name: stg_tpch_orders
+    description: >
+      Staged orders from the TPCH source. Each row represents a single order
+      placed by a customer. Renames raw O_-prefixed columns to readable snake_case.
+    columns:
+      - name: order_key
+        description: Primary key for the order.
+        tests:
+          - not_null
+          - unique
+      - name: customer_key
+        description: Foreign key to the customer who placed the order.
+        tests:
+          - not_null
+      - name: status_code
+        description: Current status of the order. F = fulfilled, O = open, P = pending.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['F', 'O', 'P']
+      - name: total_price
+        description: Total monetary value of the order.
+        tests:
+          - not_null
+      - name: order_date
+        description: Date the order was placed.
+        tests:
+          - not_null
+
+  - name: stg_tpch_line_items
+    description: >
+      Staged line items from the TPCH source. Each row represents a single product
+      within an order. An order can have multiple line items. Renames raw L_-prefixed
+      columns to readable snake_case and generates a surrogate key from order_key
+      and line_number.
+    columns:
+      - name: order_item_key
+        description: Surrogate primary key generated from order_key and line_number.
+        tests:
+          - not_null
+          - unique
+      - name: order_key
+        description: Foreign key to the parent order.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_tpch_orders')
+              field: order_key
+      - name: part_key
+        description: Foreign key to the part being ordered.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_tpch_parts')
+              field: part_key
+      - name: supplier_key
+        description: Foreign key to the supplier fulfilling the line item.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_tpch_suppliers')
+              field: supplier_key
+      - name: return_flag
+        description: "{{ doc('return_flag') }}"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['N', 'R', 'A']
+      - name: status_code
+        description: Fulfilment status of the line item. O = open, F = fulfilled.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['O', 'F']
+      - name: quantity
+        description: Number of units ordered for this line item.
+        tests:
+          - not_null
+      - name: extended_price
+        description: >
+          Total price for the line item (unit price × quantity). Despite the name,
+          this is the line total, not the per-unit price.
+        tests:
+          - not_null
+      - name: discount_percentage
+        description: Discount applied to this line item as a decimal (e.g. 0.05 = 5%).
+      - name: tax_rate
+        description: Tax rate applied to this line item as a decimal.
+
+  - name: stg_tpch_parts
+    description: Staged parts from the TPCH source. Each row is a unique part.
+    columns:
+      - name: part_key
+        description: Primary key for the part.
+        tests:
+          - not_null
+          - unique
+      - name: part_name
+        description: Descriptive name of the part.
+        tests:
+          - not_null
+      - name: retail_price
+        description: Standard retail price for the part.
+        tests:
+          - not_null
+
+  - name: stg_tpch_suppliers
+    description: Staged suppliers from the TPCH source. Each row is a unique supplier.
+    columns:
+      - name: supplier_key
+        description: Primary key for the supplier.
+        tests:
+          - not_null
+          - unique
+      - name: supplier_name
+        description: Name of the supplier.
+        tests:
+          - not_null
+      - name: nation_key
+        description: Foreign key to the nation the supplier is based in.
+        tests:
+          - not_null
+
+  - name: stg_tpch_parts_suppliers
+    description: >
+      Staged part-supplier relationships from the TPCH source. Each row represents
+      a unique combination of a part and the supplier that can provide it, including
+      availability and cost information.
+    columns:
+      - name: part_supplier_key
+        description: Surrogate primary key generated from part_key and supplier_key.
+        tests:
+          - not_null
+          - unique
+      - name: part_key
+        description: Foreign key to the part.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_tpch_parts')
+              field: part_key
+      - name: supplier_key
+        description: Foreign key to the supplier.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_tpch_suppliers')
+              field: supplier_key
+      - name: supply_cost
+        description: Cost to procure one unit of this part from this supplier.
+        tests:
+          - not_null
+      - name: available_quantity
+        description: Number of units currently available from this supplier.
+        tests:
+          - not_null
